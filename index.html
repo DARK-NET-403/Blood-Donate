@@ -39,7 +39,6 @@
       font-weight: 700;
     }
 
-    /* Main Screen menu */
     .menu {
       display: flex;
       flex-direction: column;
@@ -62,7 +61,6 @@
       background: #7f0000;
     }
 
-    /* Forms container */
     .form-section {
       background: #fff;
       border-radius: 12px;
@@ -71,6 +69,7 @@
       max-height: 650px;
       overflow-y: auto;
       transition: all 0.4s ease;
+      text-align: left;
     }
 
     .form-section form {
@@ -118,7 +117,6 @@
       background: #7f0000;
     }
 
-    /* Scrollbar style */
     .form-section::-webkit-scrollbar {
       width: 7px;
     }
@@ -127,7 +125,23 @@
       border-radius: 4px;
     }
 
-    /* Responsive */
+    /* Results box */
+    .results {
+      margin-top: 20px;
+    }
+    .result-item {
+      background: #ffe6e6;
+      border: 1px solid #b71c1c;
+      padding: 15px 20px;
+      border-radius: 10px;
+      margin-bottom: 12px;
+      color: #660000;
+    }
+    .result-item h3 {
+      margin-bottom: 8px;
+      font-weight: 700;
+    }
+
     @media (max-width: 500px) {
       .container {
         padding: 20px 22px;
@@ -161,10 +175,13 @@
   <script>
     const formContainer = document.getElementById('formContainer');
 
+    // লোকালি ডোনারদের ডেটা রাখার জন্য অ্যারে
+    let donors = [];
+
     const forms = {
       registerForm: `
         <h2 style="color:#b71c1c; margin-bottom: 20px;">ডোনার রেজিস্ট্রেশন ফর্ম</h2>
-        <form novalidate>
+        <form id="registerForm" novalidate>
           <label for="name">পুরো নাম</label>
           <input type="text" id="name" name="name" placeholder="আপনার পুরো নাম লিখুন" required />
           
@@ -192,7 +209,7 @@
       `,
       searchForm: `
         <h2 style="color:#b71c1c; margin-bottom: 20px;">ব্লাড খুঁজুন</h2>
-        <form novalidate>
+        <form id="searchForm" novalidate>
           <label for="searchBlood">রক্তের গ্রুপ নির্বাচন করুন</label>
           <select id="searchBlood" name="searchBlood" required>
             <option value="" disabled selected>-- রক্তের গ্রুপ নির্বাচন করুন --</option>
@@ -211,10 +228,11 @@
 
           <button type="submit" class="submit-btn">সার্চ করুন</button>
         </form>
+        <div class="results" id="searchResults" aria-live="polite" aria-atomic="true"></div>
       `,
       contactForm: `
         <h2 style="color:#b71c1c; margin-bottom: 20px;">যোগাযোগ</h2>
-        <form novalidate>
+        <form id="contactForm" novalidate>
           <label for="contactName">আপনার নাম</label>
           <input type="text" id="contactName" name="contactName" placeholder="আপনার নাম লিখুন" required />
 
@@ -229,11 +247,103 @@
       `
     };
 
+    function loadForm(formKey) {
+      formContainer.innerHTML = forms[formKey] || '<p>ফর্ম পাওয়া যায়নি।</p>';
+      formContainer.focus();
+
+      if(formKey === 'registerForm') {
+        const regForm = document.getElementById('registerForm');
+        regForm.addEventListener('submit', e => {
+          e.preventDefault();
+
+          // ফিল্ডের ভ্যালু নিন
+          const name = regForm.name.value.trim();
+          const bloodgroup = regForm.bloodgroup.value;
+          const address = regForm.address.value.trim();
+          const phone = regForm.phone.value.trim();
+
+          // ভ্যালিডেশন (সহজ)
+          if(!name || !bloodgroup || !address || !phone) {
+            alert('সব তথ্য সঠিকভাবে পূরণ করুন');
+            return;
+          }
+          if(!/^01[0-9]{9}$/.test(phone)) {
+            alert('সঠিক মোবাইল নাম্বার দিন');
+            return;
+          }
+
+          // নতুন ডোনার যোগ করুন
+          donors.push({name, bloodgroup, address, phone});
+
+          // ধন্যবাদ মেসেজ দেখাও
+          formContainer.innerHTML = `
+            <h2 style="color:#b71c1c; margin-bottom: 20px;">ধন্যবাদ!</h2>
+            <p>আপনার রেজিস্ট্রেশন সফল হয়েছে। আমরা শীঘ্রই আপনার সাথে যোগাযোগ করব।</p>
+            <button id="backBtn" class="submit-btn" style="max-width:150px;">মেনুতে ফিরে যান</button>
+          `;
+
+          document.getElementById('backBtn').addEventListener('click', () => {
+            loadForm(null);
+          });
+        });
+      }
+
+      else if(formKey === 'searchForm') {
+        const searchForm = document.getElementById('searchForm');
+        const resultsDiv = document.getElementById('searchResults');
+        resultsDiv.innerHTML = '';
+
+        searchForm.addEventListener('submit', e => {
+          e.preventDefault();
+
+          const bloodgroup = searchForm.searchBlood.value;
+          const location = searchForm.location.value.trim().toLowerCase();
+
+          if(!bloodgroup || !location) {
+            alert('রক্তের গ্রুপ এবং এলাকাটি সঠিকভাবে দিন');
+            return;
+          }
+
+          // মিল খুঁজে বের করা
+          const matchedDonors = donors.filter(donor => 
+            donor.bloodgroup === bloodgroup && donor.address.toLowerCase().includes(location)
+          );
+
+          if(matchedDonors.length === 0) {
+            resultsDiv.innerHTML = '<p>দুঃখিত, আপনার অনুসন্ধানের সাথে মিল পাওয়া যায়নি।</p>';
+            return;
+          }
+
+          // রেজাল্ট দেখানো
+          let output = `<h3>${matchedDonors.length} টি ডোনার পাওয়া গেছে</h3>`;
+          matchedDonors.forEach(donor => {
+            output += `
+              <div class="result-item" tabindex="0">
+                <h4>${donor.name}</h4>
+                <p><strong>রক্তের গ্রুপ:</strong> ${donor.bloodgroup}</p>
+                <p><strong>ঠিকানা:</strong> ${donor.address}</p>
+                <p><strong>মোবাইল:</strong> ${donor.phone}</p>
+              </div>
+            `;
+          });
+          resultsDiv.innerHTML = output;
+        });
+      }
+
+      else if(formKey === 'contactForm') {
+        const contactForm = document.getElementById('contactForm');
+        contactForm.addEventListener('submit', e => {
+          e.preventDefault();
+          alert('আপনার মেসেজ পাঠানো হয়েছে। ধন্যবাদ!');
+          contactForm.reset();
+        });
+      }
+    }
+
     document.querySelectorAll('.menu button').forEach(btn => {
       btn.addEventListener('click', () => {
         const formKey = btn.getAttribute('data-form');
-        formContainer.innerHTML = forms[formKey] || '<p>ফর্ম পাওয়া যায়নি।</p>';
-        formContainer.focus();
+        loadForm(formKey);
       });
     });
   </script>
