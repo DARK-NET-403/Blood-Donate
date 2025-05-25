@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>ব্লাড ডোনেশন প্ল্যাটফর্ম</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
+
+    * {
+      box-sizing: border-box;
+      margin: 0; padding: 0;
+      font-family: 'Roboto', sans-serif;
+    }
+    body, html {
+      height: 100%;
+      background: #f9f9f9;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+      color: #222;
+      user-select: none;
+    }
+
+    .container {
+      max-width: 480px;
+      width: 100%;
+      background: white;
+      padding: 30px 35px;
+      border-radius: 12px;
+      box-shadow: 0 8px 20px rgba(183, 28, 28, 0.15);
+      text-align: center;
+    }
+
+    h1 {
+      color: #b71c1c;
+      margin-bottom: 25px;
+      font-weight: 700;
+    }
+
+    /* Main Screen menu */
+    .menu {
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      margin-bottom: 25px;
+    }
+    .menu button {
+      background: #b71c1c;
+      border: none;
+      padding: 14px 20px;
+      color: white;
+      font-size: 1.2rem;
+      border-radius: 10px;
+      cursor: pointer;
+      font-weight: 700;
+      box-shadow: 0 5px 12px rgba(183, 28, 28, 0.6);
+      transition: background-color 0.3s ease;
+    }
+    .menu button:hover {
+      background: #7f0000;
+    }
+
+    /* Forms container */
+    .form-section {
+      background: #fff;
+      border-radius: 12px;
+      padding: 25px 30px;
+      box-shadow: 0 8px 20px rgba(183, 28, 28, 0.15);
+      max-height: 650px;
+      overflow-y: auto;
+      transition: all 0.4s ease;
+    }
+
+    .form-section form {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    label {
+      font-weight: 600;
+      font-size: 1rem;
+      color: #444;
+    }
+    input, select, textarea {
+      padding: 12px 15px;
+      font-size: 1rem;
+      border-radius: 8px;
+      border: 2px solid #ddd;
+      font-family: 'Roboto', sans-serif;
+      transition: border-color 0.3s ease;
+    }
+    input:focus, select:focus, textarea:focus {
+      outline: none;
+      border-color: #b71c1c;
+      box-shadow: 0 0 8px rgba(183, 28, 28, 0.4);
+    }
+    textarea {
+      min-height: 100px;
+      resize: vertical;
+    }
+    button.submit-btn {
+      background: #b71c1c;
+      border: none;
+      color: white;
+      font-weight: 700;
+      font-size: 1.1rem;
+      padding: 14px 0;
+      border-radius: 10px;
+      cursor: pointer;
+      max-width: 180px;
+      align-self: flex-start;
+      box-shadow: 0 5px 12px rgba(183, 28, 28, 0.6);
+      transition: background-color 0.3s ease;
+    }
+    button.submit-btn:hover {
+      background: #7f0000;
+    }
+
+    /* Scrollbar style */
+    .form-section::-webkit-scrollbar {
+      width: 7px;
+    }
+    .form-section::-webkit-scrollbar-thumb {
+      background-color: #b71c1c;
+      border-radius: 4px;
+    }
+
+    /* Responsive */
+    @media (max-width: 500px) {
+      .container {
+        padding: 20px 22px;
+      }
+      .menu button {
+        font-size: 1rem;
+      }
+      button.submit-btn {
+        max-width: 100%;
+        padding: 14px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container" role="main" aria-label="ব্লাড ডোনেশন প্ল্যাটফর্ম">
+    <h1>ব্লাড ডোনেশন প্ল্যাটফর্ম</h1>
+    
+    <div class="menu" role="menu" aria-label="প্রধান অপশনসমূহ">
+      <button data-form="registerForm" role="menuitem" aria-controls="registerForm">ডোনার রেজিস্ট্রেশন</button>
+      <button data-form="searchForm" role="menuitem" aria-controls="searchForm">ব্লাড খুঁজুন</button>
+      <button data-form="contactForm" role="menuitem" aria-controls="contactForm">যোগাযোগ</button>
+    </div>
+
+    <div class="form-section" id="formContainer" tabindex="0" aria-live="polite" aria-atomic="true">
+      <p style="color:#777;">উপরে থেকে একটি অপশন নির্বাচন করুন।</p>
+    </div>
+  </div>
+
+  <script>
+    const formContainer = document.getElementById('formContainer');
+
+    const forms = {
+      registerForm: `
+        <h2 style="color:#b71c1c; margin-bottom: 20px;">ডোনার রেজিস্ট্রেশন ফর্ম</h2>
+        <form novalidate>
+          <label for="name">পুরো নাম</label>
+          <input type="text" id="name" name="name" placeholder="আপনার পুরো নাম লিখুন" required />
+          
+          <label for="bloodgroup">রক্তের গ্রুপ</label>
+          <select id="bloodgroup" name="bloodgroup" required>
+            <option value="" disabled selected>-- রক্তের গ্রুপ নির্বাচন করুন --</option>
+            <option value="A+">A+</option>
+            <option value="A-">A-</option>
+            <option value="B+">B+</option>
+            <option value="B-">B-</option>
+            <option value="AB+">AB+</option>
+            <option value="AB-">AB-</option>
+            <option value="O+">O+</option>
+            <option value="O-">O-</option>
+          </select>
+
+          <label for="address">ঠিকানা</label>
+          <textarea id="address" name="address" placeholder="আপনার ঠিকানা লিখুন" required></textarea>
+
+          <label for="phone">মোবাইল নাম্বার</label>
+          <input type="tel" id="phone" name="phone" placeholder="01XXXXXXXXX" pattern="01[0-9]{9}" required />
+
+          <button type="submit" class="submit-btn">রেজিস্টার করুন</button>
+        </form>
+      `,
+      searchForm: `
+        <h2 style="color:#b71c1c; margin-bottom: 20px;">ব্লাড খুঁজুন</h2>
+        <form novalidate>
+          <label for="searchBlood">রক্তের গ্রুপ নির্বাচন করুন</label>
+          <select id="searchBlood" name="searchBlood" required>
+            <option value="" disabled selected>-- রক্তের গ্রুপ নির্বাচন করুন --</option>
+            <option value="A+">A+</option>
+            <option value="A-">A-</option>
+            <option value="B+">B+</option>
+            <option value="B-">B-</option>
+            <option value="AB+">AB+</option>
+            <option value="AB-">AB-</option>
+            <option value="O+">O+</option>
+            <option value="O-">O-</option>
+          </select>
+
+          <label for="location">জেলা বা স্থান লিখুন</label>
+          <input type="text" id="location" name="location" placeholder="আপনার এলাকাটি লিখুন" required />
+
+          <button type="submit" class="submit-btn">সার্চ করুন</button>
+        </form>
+      `,
+      contactForm: `
+        <h2 style="color:#b71c1c; margin-bottom: 20px;">যোগাযোগ</h2>
+        <form novalidate>
+          <label for="contactName">আপনার নাম</label>
+          <input type="text" id="contactName" name="contactName" placeholder="আপনার নাম লিখুন" required />
+
+          <label for="contactEmail">ইমেইল</label>
+          <input type="email" id="contactEmail" name="contactEmail" placeholder="আপনার ইমেইল দিন" required />
+
+          <label for="contactMessage">মেসেজ</label>
+          <textarea id="contactMessage" name="contactMessage" placeholder="আপনার মেসেজ লিখুন" required></textarea>
+
+          <button type="submit" class="submit-btn">পাঠান</button>
+        </form>
+      `
+    };
+
+    document.querySelectorAll('.menu button').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const formKey = btn.getAttribute('data-form');
+        formContainer.innerHTML = forms[formKey] || '<p>ফর্ম পাওয়া যায়নি।</p>';
+        formContainer.focus();
+      });
+    });
+  </script>
+
+</body>
+</html>
